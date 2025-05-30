@@ -40,23 +40,24 @@
 ### 运行服务
 1. 启动所有服务
 ```
-docker-compose up -d
+docker compose up -d
 ```
 2. 查看容器状态
 ```
-docker-compose ps
+docker compose ps
 ```
 3. 停止服务
 ```
-docker-compose down
+docker compose down
 ```
 4. 更新服务
 ```
 # 拉取最新镜像
-docker-compose pull
+docker compose pull
 # 重新创建容器
-docker-compose up -d --force-recreate
+docker compose up -d --force-recreate
 ```
+注意，旧版本 docker compose 使用 `docker-compose up -d` 这样的指令格式，请根据你系统的docker版本来选用。
 
 ### 登录
 
