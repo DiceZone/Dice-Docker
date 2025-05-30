@@ -4,6 +4,8 @@ services:
     container_name: dice-main
     stdin_open: true
     tty: true
+    ports:
+      - "20000:20000"
     working_dir: /app/Dice
     volumes:
       - "./Dice:/app/Dice"
