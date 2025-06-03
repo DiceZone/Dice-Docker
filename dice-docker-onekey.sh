@@ -1,10 +1,9 @@
 #!/bin/bash
 
 generate_mac() {
-    # 生成后4个字节的随机十六进制数
-    random_bytes=$(openssl rand -hex 3 | sed 's/$..$/\1:/g; s/.$//')
-    # 格式化为02:42:xx:xx:xx:xx
-    echo "02:42:$random_bytes"
+    random_bytes=$(openssl rand -hex 4)
+    formatted_bytes=$(echo "$random_bytes" | sed -E 's/(..)(..)(..)(..)/\1:\2:\3:\4/')
+    echo "02:42:$formatted_bytes"
 }
 MAC_ADDRESS=$(generate_mac)
 echo "已生成随机MAC地址: $MAC_ADDRESS"
@@ -15,7 +14,7 @@ curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 rm get-docker.sh
 
-# 修改 Docker 镜像源（使用1ms源加速）
+# 修改 Docker 镜像源
 echo "配置 毫秒镜像 作为 Docker 镜像源加速..."
 sudo mkdir -p /etc/docker
 sudo sh -c 'cat <<EOF > /etc/docker/daemon.json
@@ -84,19 +83,15 @@ sudo mkdir -p Dice napcat/config napcat/QQ_DATA
 QQ_CONFIG_FILE="/opt/Dice-Docker/.env"
 DEFAULT_QQ="123456"
 
-# 检查是否已经有账号配置
 if [ -f "$QQ_CONFIG_FILE" ]; then
-    # 检查文件中是否有ACCOUNT设置
     if grep -q '^ACCOUNT=' "$QQ_CONFIG_FILE"; then
         QQ_NUMBER=$(grep '^ACCOUNT=' "$QQ_CONFIG_FILE" | cut -d'=' -f2)
         echo "检测到已有骰娘QQ号配置: $QQ_NUMBER"
     else
-        # 没有ACCOUNT设置，添加默认值
         echo "没有检测到ACCOUNT设置，使用默认值: $DEFAULT_QQ"
         sudo sh -c "echo 'ACCOUNT=$DEFAULT_QQ' >> $QQ_CONFIG_FILE"
     fi
 else
-    # 文件不存在，询问用户输入
     echo "没有找到骰娘QQ号配置文件"
     read -p "请输入骰娘QQ号(按回车使用默认值 $DEFAULT_QQ): " QQ_INPUT
     
@@ -104,7 +99,6 @@ else
         echo "使用默认QQ号: $DEFAULT_QQ"
         sudo sh -c "echo 'ACCOUNT=$DEFAULT_QQ' > $QQ_CONFIG_FILE"
     else
-        # 验证输入是否为数字
         if [[ $QQ_INPUT =~ ^[0-9]+$ ]]; then
             echo "设置QQ号: $QQ_INPUT"
             sudo sh -c "echo 'ACCOUNT=$QQ_INPUT' > $QQ_CONFIG_FILE"
@@ -119,5 +113,4 @@ fi
 echo "正在安装 MCSManager..."
 sudo su -c "wget -qO- https://script.mcsmanager.com/setup_cn.sh | bash"
 
-# 完成提示
 echo "安装完成！"
