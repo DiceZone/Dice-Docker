@@ -1,5 +1,22 @@
 #!/bin/bash
 
+# 处理命令行参数
+while getopts ":q:" opt; do
+  case $opt in
+    q)
+      QQ_ARG="$OPTARG"
+      ;;
+    \?)
+      echo "无效选项: -$OPTARG" >&2
+      exit 1
+      ;;
+    :)
+      echo "选项 -$OPTARG 需要参数." >&2
+      exit 1
+      ;;
+  esac
+done
+
 # 检测 Docker 是否已安装
 check_docker_installed() {
     if command -v docker &> /dev/null && docker compose version &> /dev/null; then
@@ -14,34 +31,57 @@ DICE_DIR="/opt/Dice-Docker"
 QQ_CONFIG_FILE="$DICE_DIR/.env"
 COMPOSE_FILE="$DICE_DIR/docker-compose.yml"
 
-# 输入QQ号
+# 检查QQ参数并处理
+if [ -n "$QQ_ARG" ]; then
+    if [[ $QQ_ARG =~ ^[0-9]+$ ]]; then
+        QQ_INPUT="$QQ_ARG"
+    else
+        echo "错误：-q 参数必须是纯数字"
+        exit 1
+    fi
+fi
+
+# 配置QQ号
 sudo mkdir -p "$DICE_DIR"
 if [ -f "$QQ_CONFIG_FILE" ]; then
     if grep -q '^ACCOUNT=' "$QQ_CONFIG_FILE"; then
         QQ_NUMBER=$(grep '^ACCOUNT=' "$QQ_CONFIG_FILE" | cut -d'=' -f2)
         echo "检测到已有骰娘QQ号配置: $QQ_NUMBER"
-    else
+        QQ_INPUT="$QQ_NUMBER"  # 优先使用现有配置
+    elif [ -z "$QQ_INPUT" ]; then
         echo "环境变量文件中没有找到QQ号配置，需要输入QQ号"
-        exit 1
+        read -p "请输入骰娘QQ号（必须输入）: " QQ_INPUT
+        
+        if [ -z "$QQ_INPUT" ]; then
+            echo "错误：QQ号不能为空"
+            exit 1
+        elif [[ ! $QQ_INPUT =~ ^[0-9]+$ ]]; then
+            echo "错误：QQ号必须是纯数字"
+            exit 1
+        fi
     fi
 else
-    read -p "请输入骰娘QQ号（必须输入）: " QQ_INPUT
-    
     if [ -z "$QQ_INPUT" ]; then
-        echo "错误：QQ号不能为空"
-        exit 1
-    elif [[ $QQ_INPUT =~ ^[0-9]+$ ]]; then
-        echo "设置QQ号: $QQ_INPUT"
-        # 添加UID和GID默认值到.env
-        sudo tee "$QQ_CONFIG_FILE" > /dev/null <<EOF
+        read -p "请输入骰娘QQ号（必须输入）: " QQ_INPUT
+        
+        if [ -z "$QQ_INPUT" ]; then
+            echo "错误：QQ号不能为空"
+            exit 1
+        elif [[ ! $QQ_INPUT =~ ^[0-9]+$ ]]; then
+            echo "错误：QQ号必须是纯数字"
+            exit 1
+        fi
+    fi
+fi
+
+# 创建或更新.env文件
+if [ ! -f "$QQ_CONFIG_FILE" ] || ! grep -q '^ACCOUNT=' "$QQ_CONFIG_FILE"; then
+    echo "设置QQ号: $QQ_INPUT"
+    sudo tee "$QQ_CONFIG_FILE" > /dev/null <<EOF
 ACCOUNT=$QQ_INPUT
 NAPCAT_UID=1000
 NAPCAT_GID=1000
 EOF
-    else
-        echo "错误：QQ号必须是纯数字"
-        exit 1
-    fi
 fi
 
 # 生成随机MAC地址
