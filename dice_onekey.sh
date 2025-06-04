@@ -201,7 +201,7 @@ sudo tee "$MCS_CONFIG_FILE" > /dev/null <<EOF
     "endTime": 0,
     "fileCode": "utf8",
     "processType": "general",
-    "updateCommand": "",
+    "updateCommand": "docker compose pull",
     "crlf": 1,
     "category": 0,
     "enableRcon": false,
