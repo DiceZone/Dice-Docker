@@ -6,7 +6,17 @@
 
 [Docker Hub](https://hub.docker.com/r/shiaworkshop/dice)
 
-## 使用方法
+## 一键启动并安装MCSManager面板
+
+通过脚本的方式一键安装docker和mcsmanager和自动配置骰娘实例
+
+```shell
+wget -qO- https://shia.loli.band/upload/dice_onekey.sh | bash -s -- -q 123456789 # 最后的数字改成骰娘QQ
+```
+
+安装完成后根据提示前往面板检查和登录骰娘
+
+## 手动使用方法
 
 ### 准备工作
 
@@ -21,7 +31,7 @@
 
   我们以默认位置为例：
 
-  ```
+  ```shell
   mkdir -p -m 755 /opt/Dice-Docker
   cd /opt/Dice-Docker
   ```
@@ -30,7 +40,7 @@
 
   下载 `docker-compose.yml` ，在同一级创建 `.env` 文件。
   
-  ```
+  ```shell
   wget https://raw.githubusercontent.com/ShiaBox/Dice-Docker-Napcat/refs/heads/main/docker-compose.yml
   echo 'ACCOUNT=123456' > .env
   ```
@@ -39,19 +49,19 @@
 
 ### 运行服务
 1. 启动所有服务
-```
+```shell
 docker compose up -d
 ```
 2. 查看容器状态
-```
+```shell
 docker compose ps
 ```
 3. 停止服务
-```
+```shell
 docker compose down
 ```
 4. 更新服务
-```
+```shell
 # 拉取最新镜像
 docker compose pull
 # 重新创建容器
