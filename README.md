@@ -1,5 +1,11 @@
 # Dice-Docker-Napcat
 
+> ⚠️版本过时警告
+> 由于官方不再释出可用的Linux下DiceCore和Driver
+> 所以本项目采用了 `Core 2.6.6rc(638)` / `Driver 0.4.0(8)` 版本
+> 此版本核心较为古早，部分新特性牌堆和Mod可能无法使用
+> 请确认是否符合需求
+
 用于在linux上使用docker-compose快速组装Dice+Napcat
 
 支援amd64
