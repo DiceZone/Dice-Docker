@@ -6,9 +6,9 @@
 
 [Docker Hub](https://hub.docker.com/r/shiaworkshop/dice)
 
-## 一键启动并安装MCSManager面板
+## 一键启动
 
-通过脚本的方式一键安装docker和mcsmanager和自动配置骰娘实例
+通过脚本的方式一键安装Docker、MCSManager面板和自动配置骰娘实例，仅通过腾讯云Ubuntu24测试，理论上Debian系通用。
 
 ```shell
 wget -qO- https://shia.loli.band/upload/dice_onekey.sh | bash -s -- -q 123456789 # 最后的数字改成骰娘QQ
@@ -16,7 +16,7 @@ wget -qO- https://shia.loli.band/upload/dice_onekey.sh | bash -s -- -q 123456789
 
 安装完成后根据提示前往面板检查和登录骰娘
 
-## 手动使用方法
+## 手动使用
 
 ### 准备工作
 
