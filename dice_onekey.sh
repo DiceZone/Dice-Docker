@@ -35,6 +35,8 @@ COMPOSE_FILE="$DICE_DIR/docker-compose.yml"
 if [ -n "$QQ_ARG" ]; then
     if [[ $QQ_ARG =~ ^[0-9]+$ ]]; then
         QQ_INPUT="$QQ_ARG"
+        echo "使用命令行参数提供的QQ号: $QQ_INPUT"
+        sleep 2
     else
         echo "错误：-q 参数必须是纯数字"
         exit 1
@@ -47,6 +49,7 @@ if [ -f "$QQ_CONFIG_FILE" ]; then
     if grep -q '^ACCOUNT=' "$QQ_CONFIG_FILE"; then
         QQ_NUMBER=$(grep '^ACCOUNT=' "$QQ_CONFIG_FILE" | cut -d'=' -f2)
         echo "检测到已有骰娘QQ号配置: $QQ_NUMBER"
+        sleep 2
         QQ_INPUT="$QQ_NUMBER"  # 优先使用现有配置
     elif [ -z "$QQ_INPUT" ]; then
         echo "环境变量文件中没有找到QQ号配置，需要输入QQ号"
@@ -58,6 +61,9 @@ if [ -f "$QQ_CONFIG_FILE" ]; then
         elif [[ ! $QQ_INPUT =~ ^[0-9]+$ ]]; then
             echo "错误：QQ号必须是纯数字"
             exit 1
+        else
+            echo "已输入QQ号: $QQ_INPUT"
+            sleep 2
         fi
     fi
 else
@@ -70,6 +76,9 @@ else
         elif [[ ! $QQ_INPUT =~ ^[0-9]+$ ]]; then
             echo "错误：QQ号必须是纯数字"
             exit 1
+        else
+            echo "已输入QQ号: $QQ_INPUT"
+            sleep 2
         fi
     fi
 fi
@@ -82,6 +91,8 @@ ACCOUNT=$QQ_INPUT
 NAPCAT_UID=1000
 NAPCAT_GID=1000
 EOF
+    echo "已创建QQ配置文件: $QQ_CONFIG_FILE"
+    sleep 2
 fi
 
 # 生成随机MAC地址
@@ -92,12 +103,15 @@ generate_mac() {
 }
 MAC_ADDRESS=$(generate_mac)
 echo "已生成随机MAC地址: $MAC_ADDRESS"
+sleep 2
 
 # 检测并安装 Docker
 if check_docker_installed; then
     echo "Docker 和 Docker Compose 已安装，跳过安装步骤"
+    sleep 2
 else
     echo "正在安装 Docker..."
+    sleep 2
     
     max_retries=3
     retry_count=0
@@ -109,11 +123,17 @@ else
         # 使用自维护安装脚本镜像源解决国内网络问题
         curl --retry 3 --retry-delay 5 --connect-timeout 20 --max-time 60 \
              -fsSL https://shia.loli.band/upload/docker_install.sh -o get-docker.sh
-             
+        echo "已下载Docker安装脚本"
+        sleep 2
+        
         # 替换为腾讯云镜像源
         sed -i 's|https://download.docker.com|https://mirrors.tencent.com/docker-ce|g' get-docker.sh
+        echo "已配置腾讯云镜像源"
+        sleep 2
         
         sudo sh get-docker.sh
+        echo "执行Docker安装脚本"
+        sleep 2
         
         # 验证安装
         if command -v docker &> /dev/null && docker compose version &> /dev/null; then
@@ -122,7 +142,7 @@ else
         else
             echo "部分安装步骤失败，正在重试..."
             retry_count=$((retry_count+1))
-            sleep 5
+            sleep 2
         fi
     done
     
@@ -143,12 +163,15 @@ else
         echo "2. 手动安装 Docker：https://docs.docker.com/engine/install/"
         echo "============================================================"
         exit 1
+    else
+        echo "Docker 安装成功！"
+        sleep 2
     fi
     
     # 添加当前用户到docker组
     sudo usermod -aG docker $USER
-    
-    echo "Docker 安装成功！"
+    echo "已将当前用户添加到docker组"
+    sleep 2
 fi
 
 # 使用毫秒镜像服务加速
@@ -161,9 +184,13 @@ sudo tee /etc/docker/daemon.json >/dev/null <<EOF
   ]
 }
 EOF
+echo "已配置镜像加速"
+sleep 2
 
 sudo systemctl restart docker
 sudo systemctl enable docker
+echo "已重启并启用Docker服务"
+sleep 2
 
 # 验证 Docker 服务状态
 if ! sudo systemctl is-active --quiet docker; then
@@ -173,7 +200,13 @@ if ! sudo systemctl is-active --quiet docker; then
     if ! sudo systemctl is-active --quiet docker; then
         echo "错误：无法启动 Docker 服务"
         exit 1
+    else
+        echo "Docker服务已成功启动"
+        sleep 2
     fi
+else
+    echo "Docker服务运行正常"
+    sleep 2
 fi
 
 # 创建 MCSManager 实例配置文件
@@ -182,6 +215,8 @@ MCS_CONFIG_FILE="$MCS_CONFIG_DIR/dice.json"
 
 echo "配置 MCSManager 实例..."
 sudo mkdir -p "$MCS_CONFIG_DIR"
+echo "已创建MCSManager配置目录"
+sleep 2
 
 # 从环境变量文件获取QQ号
 ACCOUNT=$(grep '^ACCOUNT=' "$QQ_CONFIG_FILE" | cut -d'=' -f2)
@@ -251,10 +286,14 @@ sudo tee "$MCS_CONFIG_FILE" > /dev/null <<EOF
 EOF
 
 echo "MCSManager 实例配置已创建: $MCS_CONFIG_FILE"
+sleep 2
 
 # 创建 Dice-Docker 目录
 echo "设置 Dice-Docker 环境..."
 sudo mkdir -p -m 755 /opt/Dice-Docker
+echo "已创建 Dice-Docker 目录: /opt/Dice-Docker"
+sleep 2
+
 cd /opt/Dice-Docker
 
 # 生成带随机MAC地址的docker-compose.yml
@@ -301,16 +340,25 @@ networks:
     driver: bridge
 EOF
 
+echo "已生成docker-compose.yml文件"
+sleep 2
 
 # 使用sed替换MAC地址占位符
 sudo sed -i "s/\${MAC_ADDRESS}/$MAC_ADDRESS/" "$COMPOSE_FILE"
+echo "已将MAC地址替换到配置文件"
+sleep 2
 
 # 创建目录结构
 sudo mkdir -p "$DICE_DIR/Dice" "$DICE_DIR/napcat/config" "$DICE_DIR/napcat/QQ_DATA"
+echo "已创建必要目录结构"
+sleep 2
 
 # 安装 MCSM
 echo "正在安装 MCSManager..."
+sleep 2
 sudo su -c "wget -qO- https://script.mcsmanager.com/setup_cn.sh | bash"
+echo "MCSManager 安装完成"
+sleep 2
 
 # 检测内网IP
 get_internal_ip() {
@@ -340,6 +388,8 @@ get_external_ip() {
 }
 
 # 获取IP地址
+echo "获取网络配置信息..."
+sleep 2
 INTERNAL_IP=$(get_internal_ip)
 EXTERNAL_IP=$(get_external_ip)
 
