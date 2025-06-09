@@ -165,7 +165,7 @@ else
     install_success=false
     
     while [ $retry_count -lt $max_retries ]; do
-        echo "尝试 #$retry_count+1 安装 Docker..."
+        echo "尝试 #$((retry_count+1)) 安装 Docker..."
         
         # 使用自维护安装脚本镜像源解决国内网络问题
         curl --retry 3 --retry-delay 5 --connect-timeout 20 --max-time 60 \
@@ -188,7 +188,7 @@ else
             break
         else
             echo "部分安装步骤失败，正在重试..."
-            retry_count=$retry_count+1
+            retry_count=$((retry_count+1))
             sleep 2
         fi
     done
