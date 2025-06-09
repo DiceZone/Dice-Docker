@@ -300,7 +300,7 @@ cd /opt/Dice-Docker
 sudo tee "$COMPOSE_FILE" > /dev/null <<'EOF'
 services:
   dice:
-    image: shiaworkshop/dice:latest
+    image: shiaworkshop/dice:dev
     container_name: dice-main
     stdin_open: true
     tty: true
