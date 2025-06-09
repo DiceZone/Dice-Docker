@@ -1,10 +1,26 @@
 #!/bin/bash
 
 # 处理命令行参数
-while getopts ":q:" opt; do
+IMAGE_TAG="latest"  # 默认使用 latest
+CHANNEL=""          # 暂存渠道
+VERSION=""          # 暂存版本号
+QQ_ARG=""           # QQ参数
+
+# 允许的渠道值
+ALLOWED_CHANNELS=("latest" "dev")
+# 允许的版本号
+ALLOWED_VERSIONS=("638" "666")
+
+while getopts ":q:c:v:" opt; do
   case $opt in
     q)
       QQ_ARG="$OPTARG"
+      ;;
+    c)
+      CHANNEL="$OPTARG"
+      ;;
+    v)
+      VERSION="$OPTARG"
       ;;
     \?)
       echo "无效选项: -$OPTARG" >&2
@@ -16,6 +32,37 @@ while getopts ":q:" opt; do
       ;;
   esac
 done
+
+# 验证渠道参数
+if [ -n "$CHANNEL" ]; then
+  if ! [[ " ${ALLOWED_CHANNELS[@]} " =~ " $CHANNEL " ]]; then
+    echo "错误：-c 参数的值必须是 latest 或 dev"
+    exit 1
+  fi
+fi
+
+# 验证版本号参数
+if [ -n "$VERSION" ]; then
+  if ! [[ " ${ALLOWED_VERSIONS[@]} " =~ " $VERSION " ]]; then
+    echo "错误：-v 参数的值必须是以下之一: ${ALLOWED_VERSIONS[*]}"
+    exit 1
+  fi
+fi
+
+# 渠道和版本号互斥检查
+if [ -n "$CHANNEL" ] && [ -n "$VERSION" ]; then
+  echo "错误：不能同时指定 -c 和 -v 参数"
+  exit 1
+fi
+
+# 设置镜像标签
+if [ -n "$CHANNEL" ]; then
+  IMAGE_TAG="$CHANNEL"
+elif [ -n "$VERSION" ]; then
+  IMAGE_TAG="$VERSION"
+fi
+echo "将使用镜像标签: shiaworkshop/dice:$IMAGE_TAG"
+sleep 2
 
 # 检测 Docker 是否已安装
 check_docker_installed() {
@@ -118,7 +165,7 @@ else
     install_success=false
     
     while [ $retry_count -lt $max_retries ]; do
-        echo "尝试 #$((retry_count+1)) 安装 Docker..."
+        echo "尝试 #$retry_count+1 安装 Docker..."
         
         # 使用自维护安装脚本镜像源解决国内网络问题
         curl --retry 3 --retry-delay 5 --connect-timeout 20 --max-time 60 \
@@ -141,7 +188,7 @@ else
             break
         else
             echo "部分安装步骤失败，正在重试..."
-            retry_count=$((retry_count+1))
+            retry_count=$retry_count+1
             sleep 2
         fi
     done
@@ -296,11 +343,11 @@ sleep 2
 
 cd /opt/Dice-Docker
 
-# 生成带随机MAC地址的docker-compose.yml
-sudo tee "$COMPOSE_FILE" > /dev/null <<'EOF'
+# 生成带随机MAC地址和指定镜像标签的docker-compose.yml
+sudo tee "$COMPOSE_FILE" > /dev/null <<EOF
 services:
   dice:
-    image: shiaworkshop/dice:latest
+    image: shiaworkshop/dice:$IMAGE_TAG
     container_name: dice-main
     stdin_open: true
     tty: true
@@ -340,7 +387,7 @@ networks:
     driver: bridge
 EOF
 
-echo "已生成docker-compose.yml文件"
+echo "已生成docker-compose.yml文件，使用镜像标签: $IMAGE_TAG"
 sleep 2
 
 # 使用sed替换MAC地址占位符
@@ -399,6 +446,7 @@ echo "============================================================"
 echo "安装完成！以下是重要信息："
 echo ""
 echo "Dice容器工作目录: $DICE_DIR"
+echo "使用的镜像标签: $IMAGE_TAG"
 echo ""
 echo "MCSManager面板访问地址:"
 echo "  公网访问: http://${EXTERNAL_IP}:23333"
