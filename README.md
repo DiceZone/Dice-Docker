@@ -103,3 +103,17 @@ docker compose up -d --force-recreate
 
 容器日志能看到二维码，同时也推荐你使用NapCat的webUI去扫码登录，比如 `IP:6099` 或者你启动容器时映射的其他端口号。
 
+### 关于图片发送
+
+容器的运行文件已经映射出来，以默认设置（一键安装相同）为例：
+
+我们的 `/opt/Dice-Docker/Dice` 文件夹映射到了 `Dice` 和 `NapCat` 容器的 `/app/Dice` 目录里
+
+所以我们只要把图片上传到 `/opt/Dice-Docker/Dice` 文件夹的任意子目录里
+
+然后就可以在骰娘里正常引用了
+
+例如我们新建一个 `/opt/Dice-Docker/Dice/img` 文件夹，然后我把图片 `jrrp.jpg` 上传到这个文件夹里
+
+通过 CQ 码引用 `[CQ:image,file=file:///app/Dice/img/jrrp.jpg]`
+
