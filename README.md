@@ -113,7 +113,7 @@ docker compose up -d --force-recreate
 
 然后就可以在骰娘里正常引用了
 
-例如我们新建一个 `/opt/Dice-Docker/Dice/img` 文件夹，然后我把图片 `jrrp.jpg` 上传到这个文件夹里
+例如我们新建一个 `/opt/Dice-Docker/Dice/img` 文件夹（一键方式直接在面板-实例-文件管理里创建 `img` 文件夹即可），然后我把图片 `jrrp.jpg` 上传到这个文件夹里
 
 通过 CQ 码引用 `[CQ:image,file=file:///app/Dice/img/jrrp.jpg]`
 
