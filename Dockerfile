@@ -41,10 +41,21 @@ fi\n\
 \n\
 # 强制复制webui.html并且锁定权限解决webui404错误\n\
 WEBUI_TARGET="/app/Dice/Dice${ACCOUNT:-123456}/webui/index.html"\n\
-echo "正在强制复制webui.html到 ${WEBUI_TARGET} 并设置权限为444"\n\
+WEBUI_BACKUP="/opt/backup/Dice/webui.html"\n\
+\n\
+echo "正在修复 WebUI ..."\n\
+mkdir -p "$(dirname "${WEBUI_TARGET}")"\n\
+\n\
+if [ -f "${WEBUI_TARGET}" ] && lsattr "${WEBUI_TARGET}" | grep -q "i"; then\n\
+    chattr -i "${WEBUI_TARGET}" 2>/dev/null\n\
+fi\n\
+\n\
+echo "正在强制复制webui.html到 ${WEBUI_TARGET} 并锁定"\n\
     mkdir -p "$(dirname "${WEBUI_TARGET}")" \n\
-    cp -f /opt/backup/Dice/webui.html "${WEBUI_TARGET}" \n\
+    cp -f "${WEBUI_BACKUP}" "${WEBUI_TARGET}"\n\
     chmod 444 "${WEBUI_TARGET}"\n\
+    chattr +i "${WEBUI_TARGET}"\n\
+    echo "锁定 WebUI 文件"\n\
 \n\
 # 执行主程序\n\
 exec /app/Dice/DiceDriver.OneBot "$@"' > /usr/local/bin/dice-entrypoint && \
