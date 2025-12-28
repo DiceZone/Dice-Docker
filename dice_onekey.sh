@@ -169,7 +169,7 @@ else
         
         # 使用自维护安装脚本镜像源解决国内网络问题
         curl --retry 3 --retry-delay 5 --connect-timeout 20 --max-time 60 \
-             -fsSL https://shia.loli.band/upload/docker_install.sh -o get-docker.sh
+             -fsSL https://dice.zone/bash/docker_install.sh -o get-docker.sh
         echo "已下载Docker安装脚本"
         sleep 2
         
