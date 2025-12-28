@@ -27,13 +27,13 @@
 新版核心启动
 
 ```shell
-wget -qO- https://shia.loli.band/upload/dice_onekey.sh | bash -s -- -c dev -q 123456789 # 最后的数字改成骰娘QQ
+wget -qO- https://dice.zone/bash/dice_onekey.sh | bash -s -- -c dev -q 123456789 # 最后的数字改成骰娘QQ
 ```
 
 旧版核心（638）启动
 
 ```shell
-wget -qO- https://shia.loli.band/upload/dice_onekey.sh | bash -s -- -v 638 -q 123456789 # 最后的数字改成骰娘QQ
+wget -qO- https://dice.zone/bash/dice_onekey.sh | bash -s -- -v 638 -q 123456789 # 最后的数字改成骰娘QQ
 ```
 
 可选参数说明：
